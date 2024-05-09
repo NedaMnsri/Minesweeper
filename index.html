@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minesweeper Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="game-container">
+        <h1>Minesweeper Game</h1>
+        <p>Click on the cells to reveal what's underneath. Be careful not to click on a mine!</p>
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="grid" id="grid"></div>
+    </div>
+
+    <script>
+        const grid = document.getElementById('grid');
+        const progressBar = document.getElementById('progressBar');
+        const gridSize = 10;
+        const mineCount = 20;
+        let timeLeft = 20;
+        let gameover = false;
+
+        for (let i = 0; i < gridSize * gridSize; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.dataset.mine = 'false';
+            grid.appendChild(cell);
+        }
+
+        for (let i = 0; i < mineCount; i++) {
+            let index = 0;
+            do {
+                index = Math.floor(Math.random() * (gridSize * gridSize));
+            } while (grid.children[index].dataset.mine === 'true');
+            grid.children[index].dataset.mine = 'true';
+        }
+
+        grid.addEventListener('click', function (event) {
+            if (event.target.matches('.cell') && !gameover) {
+                const cell = event.target;
+                if (cell.dataset.mine === 'true') {
+                    cell.innerHTML = '💣'; // Display bomb emoji
+                    cell.classList.add('mine');
+                    const audio = new Audio('mine.mp3');
+                    audio.play();
+                    gameOver();
+                } else {
+                    cell.classList.add('revealed');
+                }
+            }
+        });
+
+        function gameOver() {
+            gameover = true;
+            clearInterval(timer);
+
+            const cells = grid.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                if (cell.dataset.mine === 'true') {
+                    cell.innerHTML = '💣';
+                    cell.classList.add('mine');
+                }
+            });
+
+            alert('Game Over!');
+        }
+
+        const timer = setInterval(function () {
+            if (!gameover) {
+                timeLeft--;
+                progressBar.style.width = (timeLeft / 20 * 100) + '%';
+                if (timeLeft <= 0) {
+                    gameOver();
+                }
+            }
+        }, 1000);
+    </script>
+</body>
+
+</html>
